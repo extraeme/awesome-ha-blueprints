@@ -1,29 +1,29 @@
 blueprint:
-  name: ZHA - TS0041 Scene Switch
-  description: Automate your Tuya 1-Button Scene Switch using ZHA events.
+  name: ZHA - TS0041 Attribute Switch (Fixed)
+  description: Automate your Tuya Switch using ZHA Attribute Updated events.
   domain: automation
   input:
     tuya_1button_scene_switch:
       name: TS0041 Switch
-      description: Tuya 1-Button Scene Switch to use
+      description: Select your Tuya button
       selector:
         device:
           integration: zha
-#          manufacturer: eWeLink
- #         model: CK-TLSR8656-SS5-01(7000)
     button_short_press:
       name: Short Press
-      description: Action to run on a short Press
+      description: Action to run when the button is clicked
       default: []
       selector:
         action: {}
 
 mode: restart
+
 trigger:
-- platform: event
-  event_type: zha_event
-  event_data:
-    device_id: !input 'tuya_1button_scene_switch'
-    command: remote_button_short_press
+  - platform: event
+    event_type: zha_attribute_updated
+    event_data:
+      device_id: !input tuya_1button_scene_switch
+      attribute_name: on_off
+
 action:
-  sequence: !input 'button_short_press'
+  - sequence: !input button_short_press
