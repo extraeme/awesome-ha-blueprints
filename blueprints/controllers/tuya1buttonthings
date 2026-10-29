@@ -1,0 +1,52 @@
+blueprint:
+  name: ZHA - TS0041 Scene Switch (Multi-Press)
+  description: Automate your Tuya 1-Button Scene Switch using ZHA events supporting short, double, and long presses.
+  domain: automation
+  input:
+    tuya_1button_scene_switch:
+      name: TS0041 Switch
+      description: Tuya 1-Button Scene Switch to use
+      selector:
+        device:
+          integration: zha
+    button_short_press:
+      name: Short Press
+      description: Action to run on a short Press
+      default: []
+      selector:
+        action: {}
+    button_double_press:
+      name: Double Press
+      description: Action to run on a double Press
+      default: []
+      selector:
+        action: {}
+    button_long_press:
+      name: Long Press
+      description: Action to run on a long Press
+      default: []
+      selector:
+        action: {}
+
+mode: restart
+
+trigger:
+  - platform: event
+    event_type: zha_event
+    event_data:
+      device_id: !input tuya_1button_scene_switch
+
+action:
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger.event.data.command == 'remote_button_short_press' }}"
+        sequence: !input button_short_press
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger.event.data.command == 'remote_button_double_press' }}"
+        sequence: !input button_double_press
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger.event.data.command == 'remote_button_long_press' }}"
+        sequence: !input button_long_press
