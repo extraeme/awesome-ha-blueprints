@@ -9,8 +9,8 @@ blueprint:
       selector:
         device:
           integration: zha
-          manufacturer: eWeLink
-          model: CK-TLSR8656-SS5-01(7000)
+#          manufacturer: eWeLink
+ #         model: CK-TLSR8656-SS5-01(7000)
     button_short_press:
       name: Short Press
       description: Action to run on a short Press
