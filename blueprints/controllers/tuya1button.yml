@@ -1,40 +1,49 @@
 blueprint:
-  name: ZHA - eWeLink Dual-Event Button Fix
-  description: Handles dual-firing eWeLink button events cleanly by catching both variants while preventing execution race conditions.
+  name: ZHA - Sonoff/eWeLink Button Native Map
+  description: Automate your eWeLink/Sonoff button using native quirk event clusters.
   domain: automation
   input:
-    ewelink_switch:
-      name: eWeLink Switch
-      description: Select your eWeLink button device
+    button_device:
+      name: Button Device
+      description: Select your eWeLink/Sonoff Button device
       selector:
         device:
           integration: zha
-          manufacturer: eWeLink
-          model: CK-TLSR8656-SS5-01(7000)
-    button_click:
-      name: Button Click Action
-      description: Action to run when the button is pressed
+    short_press:
+      name: Single Click (Toggle Command)
+      default: []
+      selector:
+        action: {}
+    double_press:
+      name: Double Click (On Command)
+      default: []
+      selector:
+        action: {}
+    long_press:
+      name: Long Press / Hold (Off Command)
       default: []
       selector:
         action: {}
 
-mode: single
+mode: restart
 
 trigger:
   - platform: event
     event_type: zha_event
     event_data:
-      device_id: !input ewelink_switch
-  - platform: event
-    event_type: zha_attribute_updated
-    event_data:
-      device_id: !input ewelink_switch
+      device_id: !input button_device
 
 action:
   - choose:
       - conditions:
           - condition: template
-            value_template: >-
-              {{ trigger.event.data.command == 'remote_button_short_press' or
-                 trigger.event.data.attribute_name == 'on_off' }}
-        sequence: !input button_click
+            value_template: "{{ trigger.event.data.command == 'toggle' }}"
+        sequence: !input short_press
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger.event.data.command == 'on' }}"
+        sequence: !input double_press
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger.event.data.command == 'off' }}"
+        sequence: !input long_press
