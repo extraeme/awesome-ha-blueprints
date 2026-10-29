@@ -1,17 +1,19 @@
 blueprint:
-  name: ZHA - eWeLink Single Button (State Override Fix)
-  description: Triggers cleanly on any state transition from the button entity to bypass duplicate ZHA events.
+  name: ZHA - eWeLink Dual-Event Button Fix
+  description: Handles dual-firing eWeLink button events cleanly by catching both variants while preventing execution race conditions.
   domain: automation
   input:
-    ewelink_switch_entity:
-      name: Button Switch Entity
-      description: Select the 'switch' or 'sensor' entity for your eWeLink button (e.g., switch.ewelink_button)
+    ewelink_switch:
+      name: eWeLink Switch
+      description: Select your eWeLink button device
       selector:
-        entity:
-          domain: [switch, sensor, binary_sensor]
+        device:
+          integration: zha
+          manufacturer: eWeLink
+          model: CK-TLSR8656-SS5-01(7000)
     button_click:
-      name: Button Action
-      description: Action to run whenever the button is pressed (like light toggle)
+      name: Button Click Action
+      description: Action to run when the button is pressed
       default: []
       selector:
         action: {}
@@ -19,8 +21,20 @@ blueprint:
 mode: single
 
 trigger:
-  - platform: state
-    entity_id: !input ewelink_switch_entity
+  - platform: event
+    event_type: zha_event
+    event_data:
+      device_id: !input ewelink_switch
+  - platform: event
+    event_type: zha_attribute_updated
+    event_data:
+      device_id: !input ewelink_switch
 
 action:
-  - sequence: !input button_click
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: >-
+              {{ trigger.event.data.command == 'remote_button_short_press' or
+                 trigger.event.data.attribute_name == 'on_off' }}
+        sequence: !input button_click
