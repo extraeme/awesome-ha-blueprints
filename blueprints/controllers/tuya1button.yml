@@ -1,14 +1,16 @@
 blueprint:
-  name: ZHA - TS0041 Scene Switch (Template Matching Fix)
-  description: Universal blueprint that evaluates the raw ZHA event payload to fix unresponsive triggers.
+  name: ZHA - eWeLink 1-Button Scene Switch (Verified Fix)
+  description: Automate your eWeLink CK-TLSR8656-SS5-01(7000) Button using ZHA events.
   domain: automation
   input:
-    tuya_1button_scene_switch:
-      name: TS0041 Switch
-      description: Select your Tuya button
+    ewelink_switch:
+      name: eWeLink Switch
+      description: Select your eWeLink button device
       selector:
         device:
           integration: zha
+          manufacturer: eWeLink
+          model: CK-TLSR8656-SS5-01(7000)
     button_short_press:
       name: Short Press
       description: Action to run on a short Press
@@ -22,14 +24,11 @@ trigger:
   - platform: event
     event_type: zha_event
     event_data:
-      device_id: !input tuya_1button_scene_switch
+      device_id: !input ewelink_switch
 
 action:
   - choose:
       - conditions:
           - condition: template
-            value_template: >-
-              {{ 'short' in trigger.event.data.command | lower or 
-                 'short' in trigger.event.data.args | string | lower or
-                 trigger.event.data.command == 'remote_button_short_press' }}
+            value_template: "{{ trigger.event.data.command == 'remote_button_short_press' }}"
         sequence: !input button_short_press
