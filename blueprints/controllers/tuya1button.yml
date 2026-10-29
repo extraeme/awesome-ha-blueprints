@@ -1,6 +1,6 @@
 blueprint:
-  name: ZHA - TS0041 Scene Switch (Verified Click Fix)
-  description: Automate your Tuya 1-Button Scene Switch using the verified Remote Button Short Press ZHA event.
+  name: ZHA - TS0041 Scene Switch (Template Matching Fix)
+  description: Universal blueprint that evaluates the raw ZHA event payload to fix unresponsive triggers.
   domain: automation
   input:
     tuya_1button_scene_switch:
@@ -23,7 +23,13 @@ trigger:
     event_type: zha_event
     event_data:
       device_id: !input tuya_1button_scene_switch
-      command: remote_button_short_press
 
 action:
-  - sequence: !input button_short_press
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: >-
+              {{ 'short' in trigger.event.data.command | lower or 
+                 'short' in trigger.event.data.args | string | lower or
+                 trigger.event.data.command == 'remote_button_short_press' }}
+        sequence: !input button_short_press
