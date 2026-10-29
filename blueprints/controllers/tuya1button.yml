@@ -1,6 +1,6 @@
 blueprint:
-  name: ZHA - TS0041 Attribute Switch (Fixed)
-  description: Automate your Tuya Switch using ZHA Attribute Updated events.
+  name: ZHA - TS0041 Scene Switch (Verified Click Fix)
+  description: Automate your Tuya 1-Button Scene Switch using the verified Remote Button Short Press ZHA event.
   domain: automation
   input:
     tuya_1button_scene_switch:
@@ -11,7 +11,7 @@ blueprint:
           integration: zha
     button_short_press:
       name: Short Press
-      description: Action to run when the button is clicked
+      description: Action to run on a short Press
       default: []
       selector:
         action: {}
@@ -20,10 +20,10 @@ mode: restart
 
 trigger:
   - platform: event
-    event_type: zha_attribute_updated
+    event_type: zha_event
     event_data:
       device_id: !input tuya_1button_scene_switch
-      attribute_name: on_off
+      command: remote_button_short_press
 
 action:
   - sequence: !input button_short_press
